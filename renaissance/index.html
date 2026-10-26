@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Renaissance Pressing – Télécharger l'application</title>
+<meta name="description" content="Suivez vos dépôts, demandez une collecte à domicile et recevez une alerte quand vos habits sont prêts.">
+<meta property="og:title" content="Application Renaissance Pressing">
+<meta property="og:description" content="Suivez vos dépôts et soyez prévenu quand vos habits sont prêts.">
+<meta property="og:image" content="logo.jpg">
+<link rel="icon" href="logo.jpg">
+<style>
+  :root { --navy:#1B2540; --gold:#B8913A; --gold-soft:#F3E2B3; --cream:#FBF8F1; --text:#2A2F3A; --muted:#5F6573; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--cream); color:var(--text); font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; line-height:1.5; }
+  main { max-width:480px; margin:0 auto; padding:32px 16px 48px; text-align:center; }
+  .logo { width:150px; height:150px; border-radius:50%; object-fit:cover; box-shadow:0 6px 20px rgba(27,37,64,.25); }
+  h1 { color:var(--navy); font-size:1.7rem; margin:20px 0 4px; }
+  .tag { color:var(--gold); font-weight:600; margin:0 0 20px; }
+  ul.perks { list-style:none; padding:0; margin:0 0 28px; text-align:left; }
+  ul.perks li { background:#fff; border:1px solid var(--gold-soft); border-radius:12px; padding:12px 14px; margin-bottom:8px; }
+  .btn { display:block; background:var(--navy); color:#fff; text-decoration:none; font-size:1.15rem; font-weight:700;
+         padding:18px; border-radius:999px; box-shadow:0 4px 14px rgba(27,37,64,.3); }
+  .btn:active { transform:scale(.98); }
+  .btn[aria-disabled="true"] { opacity:.6; pointer-events:none; }
+  .version { color:var(--muted); font-size:.9rem; margin:8px 0 32px; }
+  h2 { color:var(--navy); font-size:1.15rem; text-align:left; margin:0 0 12px; }
+  ol.steps { text-align:left; padding:0; margin:0; list-style:none; counter-reset:s; }
+  ol.steps li { counter-increment:s; position:relative; padding:12px 12px 12px 52px; background:#fff; border-radius:12px; margin-bottom:8px; border:1px solid var(--gold-soft); }
+  ol.steps li::before { content:counter(s); position:absolute; left:12px; top:12px; width:28px; height:28px; border-radius:50%;
+         background:var(--gold); color:#fff; font-weight:700; display:flex; align-items:center; justify-content:center; }
+  .note { font-size:.85rem; color:var(--muted); margin-top:24px; }
+  .iphone { display:none; background:var(--gold-soft); border-radius:12px; padding:12px; margin-bottom:20px; }
+</style>
+</head>
+<body>
+<main>
+  <img class="logo" src="logo.jpg" alt="Logo Renaissance Pressing">
+  <h1>Renaissance Pressing</h1>
+  <p class="tag">Redonnez vie à vos habits</p>
+
+  <ul class="perks">
+    <li>🧺 Suivez vos dépôts en temps réel</li>
+    <li>🔔 Soyez prévenu dès que vos habits sont prêts</li>
+    <li>🛵 Demandez une collecte à domicile</li>
+    <li>🧾 Retrouvez vos reçus et votre historique</li>
+  </ul>
+
+  <p class="iphone" id="iphone">Cette application est disponible pour les téléphones <b>Android</b>.
+     Sur iPhone, contactez directement le pressing.</p>
+
+  <a class="btn" id="download" href="https://github.com/nigexpertcnsltg/sapta-releases/releases" aria-disabled="true">Recherche de la dernière version…</a>
+  <p class="version" id="version">&nbsp;</p>
+
+  <h2>Comment l'installer ?</h2>
+  <ol class="steps">
+    <li>Appuyez sur <b>Télécharger</b>, puis ouvrez le fichier téléchargé.</li>
+    <li>Si le téléphone le demande, appuyez sur <b>Paramètres</b> et activez <b>« Autoriser cette source »</b>, puis revenez en arrière.</li>
+    <li>Appuyez sur <b>Installer</b>. Si un message de sécurité Google apparaît, choisissez <b>« Plus de détails » → « Installer quand même »</b>.</li>
+    <li>Ouvrez l'application et appuyez sur <b>Continuer avec Google</b>. C'est tout !</li>
+  </ol>
+
+  <p class="note">Les mises à jour s'installent ensuite directement depuis l'application.<br>
+     Application réalisée par NigExpert Consulting – Niamey.</p>
+</main>
+<script>
+  // La page propose toujours la dernière version publiée de l'application client Renaissance.
+  const PREFIX = "renaissance-client-v";
+  const btn = document.getElementById("download");
+  const ver = document.getElementById("version");
+  if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) document.getElementById("iphone").style.display = "block";
+
+  const newer = (a, b) => {
+    const x = a.split(".").map(Number), y = b.split(".").map(Number);
+    for (let i = 0; i < Math.max(x.length, y.length); i++) {
+      const d = (x[i] || 0) - (y[i] || 0);
+      if (d) return d > 0;
+    }
+    return false;
+  };
+
+  fetch("https://api.github.com/repos/nigexpertcnsltg/sapta-releases/releases?per_page=50")
+    .then(r => r.json())
+    .then(list => {
+      let best = null;
+      for (const r of list) {
+        if (r.draft || r.prerelease || !r.tag_name.startsWith(PREFIX)) continue;
+        const apk = r.assets.find(a => a.name.endsWith(".apk"));
+        const v = r.tag_name.slice(PREFIX.length);
+        if (apk && (!best || newer(v, best.v))) best = { v, apk };
+      }
+      if (!best) throw new Error("aucune version");
+      btn.href = best.apk.browser_download_url;
+      btn.textContent = "Télécharger l'application";
+      ver.textContent = "Version " + best.v + " · " + (best.apk.size / 1048576).toFixed(1) + " Mo · Android";
+    })
+    .catch(() => {
+      btn.textContent = "Voir les téléchargements";
+      ver.textContent = "Si le bouton ne marche pas, demandez le lien au pressing.";
+    })
+    .finally(() => btn.removeAttribute("aria-disabled"));
+</script>
+</body>
+</html>
